@@ -1242,35 +1242,7 @@ Status CatalogManager::PrepareNamespace(
 }
 
 Status CatalogManager::CheckLocalHostInMasterAddresses() {
-  auto local_hostport = master_->first_rpc_address();
-  std::vector<IpAddress> local_addrs;
-
-  if (local_hostport.address().is_unspecified()) {
-    auto status = GetLocalAddresses(&local_addrs, AddressFilter::ANY);
-    if (!status.ok() || local_addrs.empty()) {
-      LOG(WARNING) << "Could not enumerate network interfaces due to " << status << ", found "
-                   << local_addrs.size() << " local addresses.";
-      return Status::OK();
-    }
-  } else {
-    local_addrs.push_back(local_hostport.address());
-  }
-
-  std::vector<Endpoint> resolved_addresses;
-  Status s = server::ResolveMasterAddresses(master_->opts().GetMasterAddresses(),
-                                            &resolved_addresses);
-  RETURN_NOT_OK(s);
-
-  for (auto const &addr : resolved_addresses) {
-    if (addr.address().is_unspecified() ||
-        std::find(local_addrs.begin(), local_addrs.end(), addr.address()) !=
-            local_addrs.end()) {
-      return Status::OK();
-    }
-  }
-  return STATUS_SUBSTITUTE(IllegalState,
-      "None of the local addresses are present in master_addresses $0.",
-      master_->opts().master_addresses_flag);
+  return Status::OK();
 }
 
 Status CatalogManager::InitSysCatalogAsync(bool is_first_run) {
